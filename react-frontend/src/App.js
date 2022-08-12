@@ -1,6 +1,6 @@
 import { useState, useReducer, useEffect } from 'react';
-import Form from './Form';
-import Note from './Note';
+import Form from './components/Form';
+import Note from './components/Note';
 
 const reducer = ({ sort, filter }, { type, value }) => {
   switch (type) {

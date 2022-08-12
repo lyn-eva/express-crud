@@ -35,7 +35,7 @@ export default function App() {
   }, [dumbRender, filter, sort]);
 
   return (
-    <div className='min-h-screen bg-blue-300 pt-[0.1px] text-center'>
+    <div className='text-center'>
       <div className='mx-auto w-9/12'>
         <h1 className='mt-16 text-3xl'>Naomi's Notes</h1>
         <Form setDumbRender={setDumbRender} />

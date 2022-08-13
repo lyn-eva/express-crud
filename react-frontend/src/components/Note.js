@@ -1,8 +1,14 @@
 import { useRef, useState } from 'react';
+import { useMutation } from 'react-query';
+import { queryClient } from '../App';
 
-function Note({ no, id, value, done, at, setDumbRender }) {
+function Note({ no, id, value, done, at }) {
   const [editing, setEditing] = useState(false);
   const ref = useRef(null);
+
+  const mutation = useMutation((body) => updateNote(body), {
+    onSuccess: () => queryClient.invalidateQueries('notes'),
+  });
 
   const handleEdit = () => {
     if (!ref) return;
@@ -10,44 +16,24 @@ function Note({ no, id, value, done, at, setDumbRender }) {
     setTimeout(() => ref.current.focus(), 0);
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     const newVal = ref.current.value;
-    if (newVal === value) return;
-    await fetch('http://localhost:5000/api/notes', {
-      method: 'PUT',
-      body: JSON.stringify({ id, value: newVal, type: 'value' }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    mutation.mutate({ body: { id, value: newVal, type: 'value' } });
     setEditing(false);
-    setDumbRender((p) => !p);
   };
 
-  const handleChecked = async () => {
-    await fetch('http://localhost:5000/api/notes', {
-      method: 'PUT',
-      body: JSON.stringify({ id, value: Number(!done), type: 'done' }),
-      headers: { 'Content-Type': 'application/json' },
-    });
-    setDumbRender((p) => !p);
+  const handleChecked = () => {
+    mutation.mutate({ body: { id, value: Number(!done), type: 'done' } });
   };
 
-  const handleDelete = async () => {
-    await fetch('http://localhost:5000/api/notes', {
-      method: 'DELETE',
-      body: JSON.stringify({ id }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    setDumbRender((p) => !p);
+  const handleDelete = () => {
+    mutation.mutate({ body: { id }, method: 'DELETE' });
   };
 
   const date = new Date(at);
 
   return (
-    <li className='mb-7 relative flex items-center justify-between rounded-md bg-white py-2 px-6'>
+    <li className='relative mb-7 flex items-center justify-between rounded-md bg-white py-2 px-6'>
       <span>{no}.</span>
       <div className='mx-4 grow'>
         <input
@@ -59,7 +45,12 @@ function Note({ no, id, value, done, at, setDumbRender }) {
           defaultValue={value}
         />
       </div>
-      <input onClick={handleChecked} className='mx-2 cursor-pointer' type='checkbox' defaultChecked={done} />
+      <input
+        onClick={handleChecked}
+        className='mx-2 cursor-pointer'
+        type='checkbox'
+        defaultChecked={done}
+      />
       {editing ? (
         <button onClick={handleSave} className='rounded-sm bg-blue-400 px-2 py-[2px]'>
           save
@@ -81,3 +72,15 @@ function Note({ no, id, value, done, at, setDumbRender }) {
 }
 
 export default Note;
+
+const updateNote = async ({ body, method = 'PUT' }) => {
+  const result = await fetch('http://localhost:5000/api/notes', {
+    method,
+    body: JSON.stringify(body),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!result.ok) throw new Error('update operation failed');
+  return result;
+};

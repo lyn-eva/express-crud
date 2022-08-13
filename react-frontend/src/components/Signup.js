@@ -8,7 +8,22 @@ export default function Signup() {
   } = useForm();
 
   const onSubmit = async (data) => {
-    await fetch('http://localhost:5000/user/signup', {method: 'POST', body: JSON.stringify(data)});
+    console.log(data);
+    try {
+      const res = await fetch('http://localhost:5000/user/signup', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message);
+      }
+    } catch (err) {
+      console.log(err.message);
+    }
   };
 
   return (
@@ -48,7 +63,7 @@ export default function Signup() {
             <input
               className='mt-2 block py-[2px] pl-2 text-black'
               placeholder='enter a password'
-              {...register('pwd', {
+              {...register('password', {
                 required: { value: true, message: 'password is requiered' },
                 maxLength: { value: 10, message: 'must not longer than 10 characters' },
               })}
@@ -63,4 +78,3 @@ export default function Signup() {
     </main>
   );
 }
-

@@ -6,6 +6,7 @@ const session = require('express-session');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 
 const notesRouter = require('./routes/notes.route');
+const usersRouter = require('./routes/users.route');
 const db = require('./models/db');
 
 const main = async () => {
@@ -18,6 +19,7 @@ const main = async () => {
 
   // http handlers
   app.use('/api/notes', notesRouter);
+  app.use('/user', usersRouter);
 };
 main();
 

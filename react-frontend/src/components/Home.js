@@ -40,9 +40,9 @@ export default function Home() {
             defaultValue='sort by none'
             onChange={(e) => dispatch({ type: 'sort', value: e.target.value })}
           >
+            <option value='none'>sort by none</option>
             <option value='createdAt'>sort by date</option>
             <option value='value'>sort by text</option>
-            <option value='none'>none</option>
           </select>
           <button
             onClick={() => dispatch({ type: 'filter' })}
@@ -57,9 +57,7 @@ export default function Home() {
           {!data ? null : data.length === 0 ? (
             <p className='mt-20'>empty</p>
           ) : (
-            data.map((data, i) => (
-              <Note key={data.id} {...data} no={i + 1} />
-            ))
+            data.map((data, i) => <Note key={data.id} {...data} no={i + 1} />)
           )}
         </ul>
       </div>

@@ -1,4 +1,6 @@
 import { useForm } from 'react-hook-form';
+import { useMutation } from 'react-query';
+import { useNavigate } from 'react-router-dom';
 
 export default function Signup() {
   const {
@@ -7,23 +9,12 @@ export default function Signup() {
     handleSubmit,
   } = useForm();
 
+  const { mutateAsync, error } = useMutation((data) => createAcc(data));
+  const redirect = useNavigate();
+
   const onSubmit = async (data) => {
-    console.log(data);
-    try {
-      const res = await fetch('http://localhost:5000/user/signup', {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message);
-      }
-    } catch (err) {
-      console.log(err.message);
-    }
+    await mutateAsync(data);
+    redirect('/');
   };
 
   return (
@@ -68,8 +59,9 @@ export default function Signup() {
                 maxLength: { value: 10, message: 'must not longer than 10 characters' },
               })}
             />
-            {errors.pwd && <span className='text-red-500'>{errors.pwd.message}</span>}
+            {errors.password && <span className='text-red-500'>{errors.password.message}</span>}
           </div>
+          {error && <span className='mt-2 block text-red-500'>{error.message}</span>}
           <button type='submit' className='mt-6 w-full bg-orange-600 py-1 text-center'>
             Create account
           </button>
@@ -78,3 +70,18 @@ export default function Signup() {
     </main>
   );
 }
+
+const createAcc = async (body) => {
+  const res = await fetch('http://localhost:5000/user/signup', {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error);
+  }
+  return res.msg;
+};

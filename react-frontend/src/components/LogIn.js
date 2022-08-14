@@ -1,4 +1,7 @@
 import { useForm } from 'react-hook-form';
+import { useMutation } from 'react-query';
+import { useNavigate } from 'react-router-dom';
+import { queryClient } from '../App';
 
 export default function LogIn() {
   const {
@@ -6,9 +9,15 @@ export default function LogIn() {
     register,
     handleSubmit,
   } = useForm();
+  const redirect = useNavigate();
+
+  const { mutateAsync, error } = useMutation((body) => loginUser(body), {
+    onSuccess: () => queryClient.invalidateQueries('user'),
+  });
 
   const onSubmit = async (data) => {
-    const res = await fetch('http://localhost:5000/user/login', { method: 'POST', body: JSON.stringify(data) });
+    await mutateAsync(data);
+    redirect('/');
   };
 
   return (
@@ -36,13 +45,14 @@ export default function LogIn() {
             <input
               className='mt-2 block py-[2px] pl-2 text-black'
               placeholder='enter a password'
-              {...register('pwd', {
+              {...register('password', {
                 required: { value: true, message: 'password is requiered' },
                 maxLength: { value: 10, message: 'must not longer than 10 characters' },
               })}
             />
-            {errors.pwd && <span className='text-red-500'>{errors.pwd.message}</span>}
+            {errors.password && <span className='text-red-500'>{errors.password.message}</span>}
           </div>
+          {error && <span className='mt-2 block text-red-500'>{error.message}</span>}
           <button type='submit' className='mt-6 w-full bg-orange-600 py-1 text-center'>
             Log In
           </button>
@@ -51,3 +61,19 @@ export default function LogIn() {
     </main>
   );
 }
+
+const loginUser = async (data) => {
+  const response = await fetch('http://localhost:5000/user/login', {
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'Application/json',
+    },
+    credentials: 'include',
+  });
+  if (!response.ok) {
+    const res = await response.json();
+    throw new Error(res.error);
+  }
+  return response.json();
+};

@@ -78,6 +78,7 @@ const createAcc = async (body) => {
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
   });
   if (!res.ok) {
     const err = await res.json();

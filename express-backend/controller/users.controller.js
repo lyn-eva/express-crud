@@ -1,34 +1,35 @@
 const Users = require('../models/users.model');
+const bcrypt = require('bcrypt');
 
 exports.createUser = async (req, res) => {
   const exists = await Users.findOne({ where: { email: req.body.email } });
   if (exists) return res.status(409).json({ error: 'a user with this email already exists' }).end();
-  await Users.create(req.body);
+  const password = await bcrypt.hash(req.body.password, 11);
+  await Users.create({ ...req.body, password });
+  req.session.user = { loggedIn: true };
   res.json({ msg: 'account created successfully' }).end();
 };
 
-// exports.getNotes = async (req, res) => {
-//   const { orderby, filterby } = req.query;
-//   const options = {
-//     order: [orderby ?? 'createdAT'],
-//     ...(filterby && { where: { done: filterby } }),
-//   };
-//   const notes = await Notes.findAll(options);
-//   res.type('application/json').json(notes).end();
-// };
+exports.loginUser = async (req, res) => {
+  const { email, password } = req.body;
+  const user = await Users.findOne(findUserQuery(email));
+  if (!user) return res.status(409).json({ error: 'no account is created with this email' }).end();
+  const authentic = await bcrypt.compare(password, user.dataValues.hashedPwd);
+  if (!authentic) return res.status(401).json({ error: 'incorrect password' }).end();
+  req.session.user = { loggedIn: true };
+  res.json({ msg: 'successfully logged in' }).end();
+};
 
-// exports.createNote = async (req, res) => {
-//   await Notes.create({ value: req.body.value });
-//   res.end();
-// };
+exports.logoutUser = async (req, res) => {
+  await req.session.destroy();
+  res.clearCookie('express-crud-sid').json({ msg: 'successfully logged out' }).end();
+};
 
-// exports.editNote = async (req, res) => {
-//   const { id, value, type } = req.body;
-//   await Notes.update({ [type]: value }, { where: { id } });
-//   res.end();
-// };
+exports.getUserInfo = (req, res) => {
+  res.json({ ...req.session.user }).end();
+};
 
-// exports.deleteNote = async (req, res) => {
-//   await Notes.destroy({ where: { id: req.body.id } });
-//   res.end();
-// };
+const findUserQuery = (email) => ({
+  attributes: [['password', 'hashedPwd']],
+  where: { email },
+});

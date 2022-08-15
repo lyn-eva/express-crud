@@ -21,10 +21,9 @@ export default function Home() {
   const [{ sort, filter }, dispatch] = useReducer(reducer, {});
 
   const { data } = useQuery(['notes', sort, filter], fetchNotes(sort, filter));
-  const { data: user,  } = useQuery('user');
+  const { data: user } = useQuery('user');
 
   const redirect = useNavigate();
-  console.log(user);
 
   if (!user) return null;
   if (!user.loggedIn) return redirect('/login');
@@ -76,7 +75,9 @@ export default function Home() {
 const fetchNotes = (sort, filter) => async () => {
   const orderby = sort ? 'orderby=' + sort : '';
   const filterby = filter !== undefined ? '&filterby=' + filter : '';
-  const response = await fetch('http://localhost:5000/api/notes?' + orderby + filterby);
+  const response = await fetch('http://localhost:5000/api/notes?' + orderby + filterby, {
+    credentials: 'include',
+  });
   if (!response.ok) throw new Error('Something went wrong');
   return response.json();
 };

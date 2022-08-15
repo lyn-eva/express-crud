@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
+import { queryClient } from '../App';
 
 export default function Signup() {
   const {
@@ -9,7 +10,9 @@ export default function Signup() {
     handleSubmit,
   } = useForm();
 
-  const { mutateAsync, error } = useMutation((data) => createAcc(data));
+  const { mutateAsync, error } = useMutation((data) => createAcc(data), {
+    onSuccess: () => queryClient.invalidateQueries('user'),
+  });
   const redirect = useNavigate();
 
   const onSubmit = async (data) => {
@@ -84,5 +87,5 @@ const createAcc = async (body) => {
     const err = await res.json();
     throw new Error(err.error);
   }
-  return res.msg;
+  return res.json();
 };

@@ -32,6 +32,7 @@ const createNote = async (value) => {
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include'
   });
   if (!result.ok) throw new Error('operation failed');
   return result;

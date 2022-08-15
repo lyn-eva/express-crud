@@ -5,7 +5,10 @@ exports.createUser = async (req, res) => {
   const user = await Users.findOne({ attributes: ['uid'], where: { email: req.body.email } });
   if (user) return res.status(409).json({ error: 'a user with this email already exists' }).end();
   const password = await bcrypt.hash(req.body.password, 11);
-  const new_user = await Users.create({ ...req.body, password });
+  const [new_user] = await Promise.all([
+    Users.create({ ...req.body, password }),
+    req.session.regenerate(console.log),
+  ]);
   req.session.user = { loggedIn: true, uid: new_user.dataValues.uid };
   res.json({ msg: 'account created successfully' }).end();
 };

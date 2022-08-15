@@ -12,6 +12,7 @@ Notes.init(
     },
     value: { type: DataTypes.STRING, allowNull: false },
     done: { type: DataTypes.BOOLEAN, defaultValue: 0 },
+    uid: { type: DataTypes.UUID, references: { model: 'users', key: 'uid' } },
   },
   { sequelize: db, modelName: 'notes' }
 );

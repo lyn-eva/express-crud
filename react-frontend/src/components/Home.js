@@ -1,7 +1,8 @@
-import { useState, useReducer, useEffect } from 'react';
+import { useReducer } from 'react';
 import { useQuery } from 'react-query';
 import Form from './Form';
 import Note from './Note';
+import { useNavigate } from 'react-router-dom';
 
 const reducer = ({ sort, filter }, { type, value }) => {
   switch (type) {
@@ -20,6 +21,13 @@ export default function Home() {
   const [{ sort, filter }, dispatch] = useReducer(reducer, {});
 
   const { data } = useQuery(['notes', sort, filter], fetchNotes(sort, filter));
+  const { data: user,  } = useQuery('user');
+
+  const redirect = useNavigate();
+  console.log(user);
+
+  if (!user) return null;
+  if (!user.loggedIn) return redirect('/login');
 
   return (
     <div className='text-center'>

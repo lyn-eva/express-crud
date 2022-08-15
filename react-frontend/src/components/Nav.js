@@ -17,7 +17,7 @@ function Nav() {
       <nav className='flex gap-7'>
         {isLoading ? null : (
           <>
-            {user.loggedIn ? (
+            {user?.loggedIn ? (
               <button onClick={() => mutate()}>Log out</button>
             ) : (
               <Link to='login'>Log In</Link>

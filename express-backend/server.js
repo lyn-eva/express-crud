@@ -29,7 +29,7 @@ const sessionOptions = {
   resave: false,
   saveUninitialized: false,
   secret: 'end of evangelion',
-  store: new SequelizeStore({ db }),
+  store: new SequelizeStore({ db, expiration: 86400000 }),
   cookie: { maxAge: Date.now() + 86400000 },
 };
 
